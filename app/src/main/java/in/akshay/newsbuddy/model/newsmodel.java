@@ -3,6 +3,8 @@ package in.akshay.newsbuddy.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class newsmodel {
 
 
@@ -16,7 +18,7 @@ public class newsmodel {
 
     @SerializedName("articles")
     @Expose
-    private List<Article> article;
+    private List<article> article;
 
     public String getStatus() {
         return status;
@@ -34,11 +36,11 @@ public class newsmodel {
         this.totalResult = totalResult;
     }
 
-    public List<Article> getArticle() {
+    public List<article> getArticle() {
         return article;
     }
 
-    public void setArticle(List<Article> article) {
+    public void setArticle(List<article> article) {
         this.article = article;
     }
 }

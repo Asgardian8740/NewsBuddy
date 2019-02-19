@@ -1,4 +1,4 @@
-package in.akshay.newsbuddy;
+package in.akshay.newsbuddy.api;
 
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -18,7 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Retrofitclient {
 
-    public static final String BASE_URL = "https://newsapi.org/v2";
+    public static final String BASE_URL = "https://newsapi.org/v2/";
     public static Retrofit retrofit;
 
     public static Retrofit getRetrofit() {
