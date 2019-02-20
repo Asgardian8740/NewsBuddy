@@ -2,4 +2,21 @@
     <string name="app_name">NewsBuddy</string>
     <string name="empty_list_text">No records found</string>
 
+    <string name="next">NEXT</string>
+    <string name="skip">SKIP</string>
+    <string name="start">GOT IT</string>
+
+    <string name="slide_1_title">Hello News!</string>
+    <string name="slide_1_desc">The easiest way to read news on the go!</string>
+
+    <string name="slide_2_title">Save News</string>
+    <string name="slide_2_desc">Read news offline without internet!</string>
+
+
+    <string name="slide_4_title">World Travel</string>
+    <string name="slide_4_desc">Book tickets of any transportation and travel the world!</string>
+
+    <string name="play_again_desc">To see the welcome slider again, goto Settings -> apps -> welcome slider -> clear data</string>
+    <string name="play_again">Play Again</string>
+
 </resources>

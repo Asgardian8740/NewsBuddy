@@ -12,10 +12,12 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -59,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ImageView errorImage;
     private TextView errorTitle, errorMessage;
     private Button btnRetry;
-    private String countrycd = "us";
+    private String countrycd = "in";
 
     private LocationManager locationManager;
     private String provider;
@@ -69,6 +71,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -220,13 +225,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
     private void showErrorMessage(int imageView, String title, String message) {
 
-        if (errorLayout.getVisibility() == View.GONE) {
-            errorLayout.setVisibility(View.VISIBLE);
-        }
 
-        errorImage.setImageResource(imageView);
-        errorTitle.setText(title);
-        errorMessage.setText(message);
 
         btnRetry.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -342,5 +341,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void onSupportActionModeStarted(@NonNull ActionMode mode) {
+        super.onSupportActionModeStarted(mode);
+    }
+
+
 }
 

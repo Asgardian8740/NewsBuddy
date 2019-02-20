@@ -192,7 +192,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
 
         dbManager.insert(atricles.getAuthor(),atricles.getSource().getName(),
-                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getPublishedAt(),date);
+                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getPublishedAt().trim(),date);
 
 
 

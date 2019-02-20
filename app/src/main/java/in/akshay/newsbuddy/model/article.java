@@ -32,6 +32,8 @@ public class article {
     @Expose
     private String publishedAt;
 
+
+
     public Source getSource() {
         return source;
     }

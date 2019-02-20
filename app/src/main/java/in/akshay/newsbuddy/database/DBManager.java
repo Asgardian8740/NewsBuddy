@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import static in.akshay.newsbuddy.database.DatabaseHelper.PUBLISHEDAt;
 import static in.akshay.newsbuddy.database.DatabaseHelper.TABLE_NAME;
+import static in.akshay.newsbuddy.database.DatabaseHelper._ID;
 
 public class DBManager {
 
@@ -71,8 +72,21 @@ public class DBManager {
 
 
 
-    public void delete(long _id) {
-        database.delete(TABLE_NAME, DatabaseHelper._ID + "=" + _id, null);
+    public void delete(String _id) {
+
+        Cursor cursor = null;
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME + " WHERE  " + PUBLISHEDAt + " = '" + _id +"'";
+        cursor= database.rawQuery(selectQuery,null);
+        if(cursor.moveToFirst()) {
+            String rowId = cursor.getString(cursor.getColumnIndex(_ID));
+
+            database.delete(TABLE_NAME, DatabaseHelper._ID + "=" + rowId, null);
+
+
+        }
+        cursor.close();
+
+
     }
 
     public boolean ifNumberExists(String strNumber)
