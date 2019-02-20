@@ -1,6 +1,7 @@
 package in.akshay.newsbuddy;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -22,9 +24,11 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
+import com.varunest.sparkbutton.SparkButton;
 
 import java.util.List;
 
+import in.akshay.newsbuddy.database.DBManager;
 import in.akshay.newsbuddy.model.article;
 
 public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
@@ -32,6 +36,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
     private List<article> articles;
     private Context context;
     private OnItemClickListener onItemClickListener;
+
+    private DBManager dbManager;
+
 
 
     public Adapter(List<article> articles, Context context) {
@@ -51,7 +58,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
         final MyViewHolder holder = holders;
 
 
-        article model = articles.get(position);
+        final article model = articles.get(position);
+
+        dbManager = new DBManager(context);
+        dbManager.open();
+
 
 
         RequestOptions requestOptions = new RequestOptions();
@@ -86,6 +97,29 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
         holder.published_ad.setText(Utils.DateFormat(model.getPublishedAt()));
         holder.author.setText(model.getAuthor());
 
+
+
+
+        if(dbManager.ifNumberExists(model.getSource().getId())){
+            holder.save.setChecked(false);
+
+        }else {
+            holder.save.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    holder.save.setChecked(true);
+                    addtoDatabase(model);
+                }
+            });
+
+        }
+
+
+
+
+
+
+
     }
 
     @Override
@@ -107,6 +141,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
         ImageView imageView;
         ProgressBar progressBar;
         OnItemClickListener onItemClickListener;
+        SparkButton save;
 
         public MyViewHolder(View itemView, OnItemClickListener onItemClickListener) {
 
@@ -121,6 +156,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
             time = itemView.findViewById(R.id.time);
             imageView = itemView.findViewById(R.id.img);
             progressBar = itemView.findViewById(R.id.prograss_load_photo);
+            save=itemView.findViewById(R.id.star_button1);
 
             this.onItemClickListener = onItemClickListener;
 
@@ -128,7 +164,36 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
         @Override
         public void onClick(View v) {
-            onItemClickListener.onItemClick(v, getAdapterPosition());
         }
+    }
+
+    private class LoadingViewHolder extends RecyclerView.ViewHolder {
+        public ProgressBar progressBar;
+
+        public LoadingViewHolder(View view) {
+            super(view);
+            progressBar = (ProgressBar) view.findViewById(R.id.progressBar1);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+    public void addtoDatabase(article atricles){
+
+
+        dbManager.insert(atricles.getSource().getId(),atricles.getAuthor(),atricles.getSource().getName(),
+                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getUrlToImage(),atricles.getPublishedAt());
+
+
+
+
     }
 }

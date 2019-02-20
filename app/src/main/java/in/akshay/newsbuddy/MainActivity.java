@@ -2,6 +2,7 @@ package in.akshay.newsbuddy;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -17,11 +18,17 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,9 +71,17 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
 
+        recyclerView = findViewById(R.id.recyclerView);
+        layoutManager = new LinearLayoutManager(MainActivity.this);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setNestedScrollingEnabled(false);
+
         topHeadline = findViewById(R.id.topheadelines);
         loca = findViewById(R.id.location);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        LoadJson("");
 
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria, false);
@@ -91,13 +106,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
 
-        recyclerView = findViewById(R.id.recyclerView);
-        layoutManager = new LinearLayoutManager(MainActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setNestedScrollingEnabled(false);
 
-        onLoadingSwipeRefresh("");
+
+
 
 
     }
@@ -235,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
         if (addresses.size() > 0) {
-            String countryName = addresses.get(0).getCountryName();
             countrycd=addresses.get(0).getCountryCode().toLowerCase();
         }
 
@@ -278,5 +288,39 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
             return;
         }
         locationManager.requestLocationUpdates(provider, 400, 1, this);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_menu, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        final SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+        searchView.setQueryHint("Search Latest News...");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                if (query.length() > 2){
+                    onLoadingSwipeRefresh(query);
+                }
+                else {
+                    Toast.makeText(MainActivity.this, "Type more than two letters!", Toast.LENGTH_SHORT).show();
+                }
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+
+        searchMenuItem.getIcon().setVisible(false, false);
+
+        return true;
+
     }
 }
