@@ -13,15 +13,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // Table columns
 
 
-    public static final String _ID= "id";
-    public static final String A_ID= "aid";
+    public static final String _ID= "_id";
     public static final String AUTHOR= "author";
     public static final String SNAME= "source";
     public static final String TITLE= "title";
     public static final String DESC= "description";
     public static final String URL= "url";
-    public static final String URLToIMAGE= "urlToImage";
     public static final String PUBLISHEDAt= "publishedAt";
+    public static final String DATE= "date";
 
 
 
@@ -35,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Creating table query
     private static final String CREATE_TABLE = "create table " + TABLE_NAME + "(" + _ID
-            + " INTEGER PRIMARY KEY AUTOINCREMENT," + A_ID + " VARCHAR," + AUTHOR + " VARCHAR, " + SNAME + " VARCHAR, " + TITLE + " VARCHAR, " + DESC + " VARCHAR, " + URL + " VARCHAR," + URLToIMAGE + " VARCHAR," + PUBLISHEDAt + " VARCHAR);";
+            + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AUTHOR + " VARCHAR, " + SNAME + " VARCHAR, " + TITLE + " VARCHAR, " + DESC + " VARCHAR, " + URL + " VARCHAR, " + PUBLISHEDAt + " VARCHAR, " + DATE + " VARCHAR);";
 
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);

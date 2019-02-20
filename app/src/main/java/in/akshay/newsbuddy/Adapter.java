@@ -94,21 +94,23 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
         holder.desc.setText(model.getDescription());
         holder.source.setText(model.getSource().getName());
         holder.time.setText(" \u2022 " + Utils.DateToTimeFormat(model.getPublishedAt()));
-        holder.published_ad.setText(Utils.DateFormat(model.getPublishedAt()));
+
+        final String date=Utils.DateFormat(model.getPublishedAt());
+        holder.published_ad.setText(date);
         holder.author.setText(model.getAuthor());
 
 
 
 
-        if(dbManager.ifNumberExists(model.getSource().getId())){
-            holder.save.setChecked(false);
+        if(dbManager.ifNumberExists(model.getPublishedAt())){
+            holder.save.setChecked(true);
 
         }else {
             holder.save.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     holder.save.setChecked(true);
-                    addtoDatabase(model);
+                    addtoDatabase(model,date);
                 }
             });
 
@@ -186,11 +188,11 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
 
 
-    public void addtoDatabase(article atricles){
+    public void addtoDatabase(article atricles,String date){
 
 
-        dbManager.insert(atricles.getSource().getId(),atricles.getAuthor(),atricles.getSource().getName(),
-                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getUrlToImage(),atricles.getPublishedAt());
+        dbManager.insert(atricles.getAuthor(),atricles.getSource().getName(),
+                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getPublishedAt(),date);
 
 
 

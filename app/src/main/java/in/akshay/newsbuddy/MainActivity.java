@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Criteria;
@@ -19,6 +20,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -56,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private ImageView errorImage;
     private TextView errorTitle, errorMessage;
     private Button btnRetry;
-    private  String countrycd="us";
+    private String countrycd = "us";
 
     private LocationManager locationManager;
     private String provider;
@@ -83,16 +86,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         LoadJson("");
 
+        showDebugDBAddressLogToast(MainActivity.this);
+
         Criteria criteria = new Criteria();
         provider = locationManager.getBestProvider(criteria, false);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+
             return;
         }
         Location location = locationManager.getLastKnownLocation(provider);
@@ -106,11 +105,20 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
 
+    }
 
+    public static void showDebugDBAddressLogToast(Context context) {
+        if (BuildConfig.DEBUG) {
+            try {
+                Class<?> debugDB = Class.forName("com.amitshekhar.DebugDB");
+                Method getAddressLog = debugDB.getMethod("getAddressLog");
+                Object value = getAddressLog.invoke(null);
+                Log.i("ip", String.valueOf(value));
+                Toast.makeText(context, (String) value, Toast.LENGTH_LONG).show();
+            } catch (Exception ignore) {
 
-
-
-
+            }
+        }
     }
 
 
@@ -233,8 +241,8 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     @SuppressLint("MissingPermission")
     @Override
     public void onLocationChanged(Location location) {
-        if(location==null) {
-            location=locationManager.getLastKnownLocation(provider);
+        if (location == null) {
+            location = locationManager.getLastKnownLocation(provider);
         }
         loca.setText(String.valueOf(location.getProvider() + location.getLatitude()));
         Geocoder gcd = new Geocoder(MainActivity.this, Locale.getDefault());
@@ -246,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
         if (addresses.size() > 0) {
-            countrycd=addresses.get(0).getCountryCode().toLowerCase();
+            countrycd = addresses.get(0).getCountryCode().toLowerCase();
         }
 
 
@@ -303,10 +311,9 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                if (query.length() > 2){
+                if (query.length() > 2) {
                     onLoadingSwipeRefresh(query);
-                }
-                else {
+                } else {
                     Toast.makeText(MainActivity.this, "Type more than two letters!", Toast.LENGTH_SHORT).show();
                 }
                 return false;
@@ -323,4 +330,17 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         return true;
 
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.mynews:
+                Intent intent = new Intent(MainActivity.this, Bookmarked.class);
+                startActivity(intent);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }
+

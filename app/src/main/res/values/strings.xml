@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">NewsBuddy</string>
+    <string name="empty_list_text">No records found</string>
+
 </resources>
