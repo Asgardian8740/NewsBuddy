@@ -32,7 +32,7 @@ public class DBManager {
         dbHelper.close();
     }
 
-    public void insert(String author, String sname, String title, String description, String url, String publishedAt,String date) {
+    public void insert(String author, String sname, String title, String description, String url, String publishedAt,String date,String content) {
         ContentValues contentValue = new ContentValues();
         contentValue.put(DatabaseHelper.AUTHOR, author);
         contentValue.put(DatabaseHelper.SNAME, sname);
@@ -41,32 +41,19 @@ public class DBManager {
         contentValue.put(DatabaseHelper.URL, url);
         contentValue.put(DatabaseHelper.PUBLISHEDAt, publishedAt);
         contentValue.put(DatabaseHelper.DATE, date);
+        contentValue.put(DatabaseHelper.CONTENT,content);
         database.insert(TABLE_NAME, null, contentValue);
     }
 
     public Cursor fetch() {
         String[] columns = new String[] { DatabaseHelper._ID, DatabaseHelper.AUTHOR, DatabaseHelper.SNAME, DatabaseHelper.TITLE,DatabaseHelper.DESC,
-                DatabaseHelper.URL,DatabaseHelper.PUBLISHEDAt,DatabaseHelper.DATE };
+                DatabaseHelper.URL,DatabaseHelper.PUBLISHEDAt,DatabaseHelper.DATE,DatabaseHelper.CONTENT };
         Cursor cursor = database.query(TABLE_NAME, columns, null, null, null, null, null);
         if (cursor != null) {
             cursor.moveToFirst();
         }
         return cursor;
     }
-
-    public int update(long _id,String author, String sname, String title, String description, String url, String publishedAt,String date) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(DatabaseHelper.AUTHOR, author);
-        contentValues.put(DatabaseHelper.SNAME, sname);
-        contentValues.put(DatabaseHelper.TITLE, title);
-        contentValues.put(DatabaseHelper.DESC, description);
-        contentValues.put(DatabaseHelper.URL, url);
-        contentValues.put(DatabaseHelper.PUBLISHEDAt, publishedAt);
-        contentValues.put(DatabaseHelper.DATE, date);
-        int i = database.update(TABLE_NAME, contentValues, DatabaseHelper._ID + " = " + _id, null);
-        return i;
-    }
-
 
 
 

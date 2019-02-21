@@ -21,6 +21,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String URL= "url";
     public static final String PUBLISHEDAt= "publishedAt";
     public static final String DATE= "date";
+    public static final String CONTENT= "content";
 
 
 
@@ -34,7 +35,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Creating table query
     private static final String CREATE_TABLE = "create table " + TABLE_NAME + "(" + _ID
-            + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AUTHOR + " VARCHAR, " + SNAME + " VARCHAR, " + TITLE + " VARCHAR, " + DESC + " VARCHAR, " + URL + " VARCHAR, " + PUBLISHEDAt + " VARCHAR, " + DATE + " VARCHAR);";
+            + " INTEGER PRIMARY KEY AUTOINCREMENT, " + AUTHOR + " VARCHAR, " + SNAME + " VARCHAR, " + TITLE + " VARCHAR, " + DESC + " VARCHAR, " + URL + " VARCHAR, " + PUBLISHEDAt + " VARCHAR, " + DATE + " VARCHAR, " + CONTENT + " VARCHAR);";
 
     public DatabaseHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);

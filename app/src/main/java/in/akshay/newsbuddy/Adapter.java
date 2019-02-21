@@ -166,6 +166,8 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
         @Override
         public void onClick(View v) {
+            onItemClickListener.onItemClick(v, getAdapterPosition());
+
         }
     }
 
@@ -192,7 +194,7 @@ public class Adapter extends RecyclerView.Adapter<Adapter.MyViewHolder>{
 
 
         dbManager.insert(atricles.getAuthor(),atricles.getSource().getName(),
-                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getPublishedAt().trim(),date);
+                atricles.getTitle(),atricles.getDescription(),atricles.getUrl(),atricles.getPublishedAt().trim(),date,atricles.getContent());
 
 
 

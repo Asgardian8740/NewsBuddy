@@ -32,6 +32,10 @@ public class article {
     @Expose
     private String publishedAt;
 
+    @SerializedName("content")
+    @Expose
+    private String content;
+
 
 
     public Source getSource() {
@@ -90,5 +94,13 @@ public class article {
 
     public void setPublishedAt(String publishedAt) {
         this.publishedAt = publishedAt;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }

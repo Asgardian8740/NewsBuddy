@@ -1,5 +1,9 @@
 package in.akshay.newsbuddy.api;
 
+import android.content.Context;
+
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.security.cert.CertificateException;
@@ -21,20 +25,32 @@ public class Retrofitclient {
     public static final String BASE_URL = "https://newsapi.org/v2/";
     public static Retrofit retrofit;
 
-    public static Retrofit getRetrofit() {
+    /*  public static Retrofit getRetrofit() {
 
+          if (retrofit == null) {
+
+              retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
+                      .client(getUnsafeOkHttpClient().build())
+                      .addConverterFactory(GsonConverterFactory.create())
+                      .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                      .build();
+
+          }
+
+
+          return retrofit;
+      }*/
+    public static Retrofit getClient() {
         if (retrofit == null) {
-
-            retrofit = new Retrofit.Builder().baseUrl(BASE_URL)
-                    .client(getUnsafeOkHttpClient().build())
+            retrofit = new Retrofit.Builder()
                     .addConverterFactory(GsonConverterFactory.create())
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                    .baseUrl(BASE_URL)
                     .build();
-
         }
-
-
         return retrofit;
     }
+
 
     public static OkHttpClient.Builder getUnsafeOkHttpClient() {
         try {
