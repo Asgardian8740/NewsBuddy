@@ -68,14 +68,11 @@ public class Bookmarked extends AppCompatActivity {
 
                 SwipeMenuItem deleteItem = new SwipeMenuItem(
                         getApplicationContext());
-                // set item background
                 deleteItem.setBackground(new ColorDrawable(Color.rgb(230,
                         230, 230)));
-                // set item width
                 deleteItem.setWidth(200);
-                // set a icon
+
                 deleteItem.setIcon(R.drawable.ic_delete);
-                // add to menu
                 menu.addMenuItem(deleteItem);
             }
         };
