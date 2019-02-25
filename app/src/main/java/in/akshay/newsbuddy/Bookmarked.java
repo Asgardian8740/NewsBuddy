@@ -114,6 +114,7 @@ public class Bookmarked extends AppCompatActivity {
                 if(isNetworkAvailable()) {
                     Intent myIntent = new Intent(Bookmarked.this, MainActivity.class);
                     myIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    myIntent.putExtra("keyv",1);
                     startActivity(myIntent);
                 }else{
                     FancyToast.makeText(this,"Connect to Internet First !",FancyToast.LENGTH_SHORT,FancyToast.ERROR,true).show();

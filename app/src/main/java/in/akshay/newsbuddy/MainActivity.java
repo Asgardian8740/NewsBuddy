@@ -21,7 +21,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.ContextCompat;
@@ -47,10 +49,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.easywaylocation.EasyWayLocation;
+import com.example.easywaylocation.Listener;
+import com.google.android.gms.location.LocationCallback;
 import com.shashank.sony.fancytoastlib.FancyToast;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -66,8 +70,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.example.easywaylocation.EasyWayLocation.LOCATION_SETTING_REQUEST_CODE;
 
-public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, LocationListener, View.OnClickListener {
+
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, View.OnClickListener, Listener {
 
     public static final String API_KEY = "38d3d4708967467e9f04937c7547b833";
     private RecyclerView recyclerView;
@@ -76,18 +82,15 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     private Adapter adapter;
     private String TAG = MainActivity.class.getSimpleName();
     private SwipeRefreshLayout swipeRefreshLayout;
-    private String countrycd = "in";
+    private String countrycd="in";
     LinearLayout catlay;
     int k = 0;
     TextView buss, tech, sports, enter, sci, gen, health;
-
-
-    public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
-    private LocationManager locationManager;
-    private String provider;
     String category = "general";
     String sortby = "publishedAt";
-
+    EasyWayLocation easyWayLocation;
+    int j = 0;
+    Bundle bundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,10 +100,11 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
         if (!isNetworkAvailable()) {
             FancyToast.makeText(this, "Internet Not Available,Redirected to saved articles", FancyToast.LENGTH_LONG, FancyToast.WARNING, true);
-            Intent intent=new Intent(MainActivity.this,Bookmarked.class);
+            Intent intent = new Intent(MainActivity.this, Bookmarked.class);
             startActivity(intent);
             return;
         }
+
 
         catlay = (LinearLayout) findViewById(R.id.layoutcat);
 
@@ -137,20 +141,25 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         recyclerView.setNestedScrollingEnabled(false);
 
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        Criteria criteria = new Criteria();
-        startAlarm(true,true);
-        provider = locationManager.getBestProvider(criteria, false);
-        checkLocationPermission();
-        LoadJson("");
+        boolean requireFineGranularity = false;
 
-       // showDebugDBAddressLogToast(MainActivity.this);  For Debugging the SQLITE
+        bundle = getIntent().getExtras();
+        if(bundle!=null){
+            j=bundle.getInt("keyv");
+        }
 
+
+        easyWayLocation = new EasyWayLocation(this, requireFineGranularity);
+        easyWayLocation.setListener(this);
+
+
+        startAlarm(true, true);
 
 
     }
 
-    public static void showDebugDBAddressLogToast(Context context) {
+
+   /*public static void showDebugDBAddressLogToast(Context context) {
         if (BuildConfig.DEBUG) {
             try {
                 Class<?> debugDB = Class.forName("com.amitshekhar.DebugDB");
@@ -162,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
             }
         }
-    }
+    }*/
 
 
     public void LoadJson(final String keyword) {
@@ -307,20 +316,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     }
 
 
-
-
-    @SuppressLint("MissingPermission")
-    @Override
-    public void onLocationChanged(Location location) {
-        if (location == null) {
-            location = locationManager.getLastKnownLocation(provider);
-        }
-        updatecd(location);
-
-
-    }
-
-    public void updatecd(Location location) {
+    public void updatecd(EasyWayLocation location) {
         Geocoder gcd = new Geocoder(MainActivity.this, Locale.getDefault());
         List<Address> addresses = null;
         try {
@@ -338,36 +334,17 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
 
     @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
-        locationManager.removeUpdates(this);
+        easyWayLocation.endUpdates();
+
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 400, 1, this);
+        easyWayLocation.beginUpdates();
 
     }
 
@@ -398,7 +375,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 return false;
             }
         });
-        catlay.setVisibility(View.VISIBLE);
         searchMenuItem.getIcon().setVisible(false, false);
 
 
@@ -423,91 +399,6 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         super.onSupportActionModeStarted(mode);
     }
 
-    public boolean checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-
-
-                new AlertDialog.Builder(this)
-                        .setTitle("Location Permission")
-                        .setMessage("Allow us to detect your location!")
-                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                ActivityCompat.requestPermissions(MainActivity.this,
-                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                        MY_PERMISSIONS_REQUEST_LOCATION);
-                            }
-                        })
-                        .create()
-                        .show();
-
-
-            } else {
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        MY_PERMISSIONS_REQUEST_LOCATION);
-            }
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_LOCATION: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-
-                    if (ContextCompat.checkSelfPermission(this,
-                            Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED) {
-
-
-                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-
-                            return;
-                        }
-                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
-                            return;
-                        }
-                        Location location = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-
-                        if (location != null) {
-                            System.out.println("Provider " + provider + " has been selected.");
-                            onLocationChanged(location);
-                            updatecd(location);
-
-                        } else {
-
-                        }
-                    }
-
-                } else {
-
-
-                }
-                return;
-            }
-
-        }
-    }
 
     public boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -618,28 +509,28 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
 
     }
+
     private void startAlarm(boolean isNotification, boolean isRepeat) {
-        AlarmManager manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent myIntent;
         PendingIntent pendingIntent;
 
-        // SET TIME HERE
-        Calendar calendar= Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY,7);
-        calendar.set(Calendar.MINUTE,00);
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 7);
+        calendar.set(Calendar.MINUTE, 00);
 
 
-        myIntent = new Intent(MainActivity.this,Notification_Receiver.class);
-        pendingIntent = PendingIntent.getBroadcast(this,0,myIntent,0);
+        myIntent = new Intent(MainActivity.this, Notification_Receiver.class);
+        pendingIntent = PendingIntent.getBroadcast(this, 0, myIntent, 0);
 
 
-        if(!isRepeat)
-            manager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime()+3000,pendingIntent);
+        if (!isRepeat)
+            manager.set(AlarmManager.RTC_WAKEUP, SystemClock.elapsedRealtime() + 3000, pendingIntent);
         else
-            manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY,pendingIntent);
+            manager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
     }
 
-    private void initListener(){
+    private void initListener() {
 
         adapter.setOnItemClickListener(new Adapter.OnItemClickListener() {
             @Override
@@ -650,12 +541,12 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 article article = articles.get(position);
                 intent.putExtra("url", article.getUrl());
                 intent.putExtra("title", article.getTitle());
-                intent.putExtra("img",  article.getUrlToImage());
-                intent.putExtra("date",  article.getPublishedAt());
-                intent.putExtra("source",  article.getSource().getName());
-                intent.putExtra("author",  article.getAuthor());
+                intent.putExtra("img", article.getUrlToImage());
+                intent.putExtra("date", article.getPublishedAt());
+                intent.putExtra("source", article.getSource().getName());
+                intent.putExtra("author", article.getAuthor());
 
-                Pair<View, String> pair = Pair.create((View)imageView, ViewCompat.getTransitionName(imageView));
+                Pair<View, String> pair = Pair.create((View) imageView, ViewCompat.getTransitionName(imageView));
                 ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(
                         MainActivity.this,
                         pair
@@ -664,7 +555,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                     startActivity(intent, optionsCompat.toBundle());
-                }else {
+                } else {
                     startActivity(intent);
                 }
 
@@ -672,5 +563,51 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         });
 
     }
-}
 
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void locationOn() {
+        if(j==0) {
+            FancyToast.makeText(this, "Location ON", FancyToast.INFO, FancyToast.LENGTH_SHORT, true).show();
+        }
+
+        easyWayLocation.beginUpdates();
+
+        updatecd(easyWayLocation);
+
+    }
+
+    @Override
+    public void onPositionChanged() {
+
+
+    }
+
+    @Override
+    public void locationCancelled() {
+
+        easyWayLocation.showAlertDialog(getString(R.string.app_name), getString(R.string.app_name), null);
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case LOCATION_SETTING_REQUEST_CODE:
+                easyWayLocation.onActivityResult(resultCode);
+                break;
+        }
+    }
+}
